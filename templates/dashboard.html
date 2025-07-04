@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CalmConnect Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+  <div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <div class="w-64 bg-blue-600 text-white p-5">
+      <h2 class="text-2xl font-bold mb-10 text-center">CalmConnect</h2>
+      <ul id="sidebarMenu" class="space-y-1">
+        <li><button onclick="showSection('home', this)" class="w-full text-left py-2 px-3 rounded hover:bg-blue-500">🏠 Home</button></li>
+        <li><button onclick="showSection('chat', this)" class="w-full text-left py-2 px-3 rounded hover:bg-blue-500">💬 Chat with CalmBot</button></li>
+        <li><button onclick="showSection('motivate', this)" class="w-full text-left py-2 px-3 rounded hover:bg-blue-500">🌈 Get Motivated</button></li>
+        <li><button onclick="showSection('books', this)" class="w-full text-left py-2 px-3 rounded hover:bg-blue-500">📚 Book Recommendations</button></li>
+        <li><button onclick="showSection('tips', this)" class="w-full text-left py-2 px-3 rounded hover:bg-blue-500">🧠 Mental Health Tips</button></li>
+        <li><button onclick="showSection('about', this)" class="w-full text-left py-2 px-3 rounded hover:bg-blue-500">ℹ About Us</button></li>
+        <li><button onclick="logout()" class="w-full text-left py-2 px-3 rounded hover:bg-red-500 text-red-200">🚪 Logout</button></li>
+      </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 p-8 overflow-y-auto">
+      <!-- Home -->
+      <div id="home" class="section">
+        <h1 class="text-3xl font-semibold mb-4">🏠 Welcome to CalmConnect</h1>
+        <p>This is your personalized dashboard for mental wellness support.</p>
+      </div>
+
+      <!-- Chat -->
+      <div id="chat" class="section hidden">
+        <h1 class="text-3xl font-semibold mb-4">💬 Chat with CalmBot</h1>
+        <p>Here you'll talk with CalmBot for support and positivity.</p>
+      </div>
+
+      <!-- Motivation -->
+      <div id="motivate" class="section hidden">
+        <h1 class="text-3xl font-semibold mb-4">🌈 Get Motivated</h1>
+        <p>Find quotes, music, and videos to lift your mood.</p>
+      </div>
+
+      <!-- Books -->
+      <div id="books" class="section hidden">
+        <h1 class="text-3xl font-semibold mb-4">📚 Book Recommendations</h1>
+        <p class="mb-4">Books to guide you through stress and healing.</p>
+
+        <h2 class="text-xl font-semibold mb-2">Suggest a New Book</h2>
+        <form id="bookForm" class="bg-white p-4 rounded shadow max-w-lg space-y-3">
+          <div>
+            <label class="block font-medium">📖 Book Title</label>
+            <input type="text" id="title" placeholder="Book Title" required class="w-full p-2 border rounded" />
+          </div>
+          <div>
+            <label class="block font-medium">✍ Author</label>
+            <input type="text" id="author" placeholder="Author" required class="w-full p-2 border rounded" />
+          </div>
+          <div>
+            <label class="block font-medium">📝 Review (Optional)</label>
+            <textarea id="summary" placeholder="Short Summary" class="w-full p-2 border rounded"></textarea>
+          </div>
+          <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Submit</button>
+        </form>
+        <p id="submitMessage" class="text-green-600 mt-2"></p>
+      </div>
+
+      <!-- Tips Section -->
+      <div id="tips" class="section hidden">
+        <h1 class="text-3xl font-semibold mb-4">🧠 Mental Health Tips</h1>
+        <p class="mb-4">Share tips that have helped you maintain peace and mental wellness.</p>
+        
+        <form id="tipForm" class="bg-white p-4 rounded shadow max-w-lg space-y-3">
+          <div>
+            <label class="block font-medium">💡 Your Tip</label>
+            <textarea id="tip" placeholder="Type your tip here..." required class="w-full p-2 border rounded"></textarea>
+          </div>
+          <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Share Tip</button>
+        </form>
+        <p id="tipMessage" class="text-green-600 mt-2"></p>
+      </div>
+
+      <!-- About -->
+      <div id="about" class="section hidden">
+        <h1 class="text-3xl font-semibold mb-4">ℹ About CalmConnect</h1>
+        <p>CalmConnect supports students and professionals in mental health journeys.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    function showSection(sectionId, clickedBtn) {
+      document.querySelectorAll(".section").forEach(sec => sec.classList.add("hidden"));
+      document.getElementById(sectionId).classList.remove("hidden");
+
+      const buttons = document.querySelectorAll("#sidebarMenu button");
+      buttons.forEach(btn => btn.classList.remove("bg-blue-800"));
+      clickedBtn.classList.add("bg-blue-800");
+    }
+
+    window.onload = () => {
+      document.querySelector("#sidebarMenu button").click();
+    };
+
+    function logout() {
+      alert("Logged out.");
+      window.location.href = "login.html";
+    }
+
+    document.getElementById('bookForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const title = document.getElementById('title').value;
+      const author = document.getElementById('author').value;
+      const summary = document.getElementById('summary').value;
+
+      fetch('http://localhost:5000/submit-book', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, author, summary })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('submitMessage').textContent = data.message || "Book submitted!";
+        document.getElementById('bookForm').reset();
+      })
+      .catch(() => {
+        document.getElementById('submitMessage').textContent = "Error submitting book.";
+      });
+    });
+
+    document.getElementById('tipForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const tip = document.getElementById('tip').value;
+
+      fetch('http://localhost:5000/submit-tip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tip })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('tipMessage').textContent = data.message || "Tip shared!";
+        document.getElementById('tipForm').reset();
+      })
+      .catch(() => {
+        document.getElementById('tipMessage').textContent = "Error submitting tip.";
+      });
+    });
+  </script>
+</body>
+</html>
